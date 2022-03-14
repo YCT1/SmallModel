@@ -4,6 +4,7 @@ from torch.nn import Linear,Sigmoid, L1Loss
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
 from collections import OrderedDict
+
 class NNSR(torch.nn.Module):
     def __init__(self, source_Dimention, target_Dimention) -> None:
         super(NNSR,self).__init__()
@@ -35,6 +36,7 @@ class NNSR(torch.nn.Module):
         return x
         
 
+        
 class MyDataset(Dataset):
     def __init__(self, source_data, target_data) -> None:
         super(MyDataset,self).__init__()
@@ -105,17 +107,22 @@ class SuperReso():
         self.model.eval()
 
         test_loss, correct = 0,0
-
+        test_results = []
         with torch.no_grad():
             for X,y in test_dataloader:
                 X, y = X.to(self.device), y.to(self.device)
                 pred = self.model(X)
-                test_loss += self.L1loss(pred, y).item()
+                result = self.L1loss(pred, y).item()
+                test_loss += result
+
+                for X_item, Y_item in zip(pred,y):
+
+                    test_results.append(self.L1loss(X_item, Y_item).item())
 
                 pass
 
         test_loss /= len(test_dataloader)
-        return test_loss
+        return test_loss, test_results
 
     def get_parameters(self):
 
